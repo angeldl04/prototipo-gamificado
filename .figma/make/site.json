@@ -1,0 +1,10 @@
+{
+  "description": "Engage university students in a gamified shopping experience that challenges their consumption habits, encouraging reflection on needs versus wants.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
