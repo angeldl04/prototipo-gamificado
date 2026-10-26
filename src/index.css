@@ -296,3 +296,40 @@ button:focus-visible { outline: 3px solid var(--violet); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+
+/* Mejoras de CTRL+COMPRA: accesibilidad, misión, logros y controles nuevos */
+.restart-link { display: block; margin: 14px auto 0; padding: 8px 12px; border: 1px solid currentColor; border-radius: 999px; background: transparent; color: inherit; font: inherit; font-size: 12px; cursor: pointer; }
+.restart-link:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #6750d8; outline-offset: 3px; }
+.influence-picker { margin: 15px 0 18px; padding: 12px; border: 1px solid var(--line); border-radius: 13px; display: flex; flex-wrap: wrap; gap: 9px 13px; }
+.influence-picker legend { padding: 0 5px; font-size: 11px; font-weight: 900; }
+.influence-picker label { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; cursor: pointer; }
+.influence-picker input { accent-color: #171717; }
+.timer-ended { margin: -5px 0 12px !important; padding: 9px 11px; border-radius: 8px; background: #fff0d8; color: #603d00 !important; font-size: 12px !important; }
+.mission-result, .badges-card { margin-top: 16px; text-align: left; }
+.mission-status { display: inline-block; margin: 12px 0 3px; padding: 9px 12px; border: 1px solid currentColor; border-radius: 9px; font-size: 13px; letter-spacing: .04em; }
+.mission-result p { color: #666; line-height: 1.5; margin: 8px 0 0; }
+.badges-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-top: 15px; }
+.achievement { min-width: 0; min-height: 135px; padding: 13px 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; border: 1px solid var(--line); border-radius: 13px; }
+.achievement.unlocked { background: #eff9c9; border-color: #9ebc39; color: #263000; }
+.achievement.locked { background: #f3f0e9; color: #73716b; }
+.achievement b { font-size: 11px; line-height: 1.25; }
+.achievement small { font-size: 10px; line-height: 1.35; }
+.achievement span { margin-top: auto; font-size: 8px; font-weight: 900; letter-spacing: .04em; }
+.round-progress { display: block; min-width: 130px; }
+@media (max-width: 900px) { .round-progress { display: block; min-width: 100px; } .badges-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 650px) { .round-progress { min-width: 88px; max-width: 115px; } .round-label { font-size: 9px; } .badges-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .achievement { min-height: 125px; } .influence-picker { gap: 10px; } }
+
+.simulation-note { max-width: 580px; margin-top: 8px !important; font-size: 12px !important; color: #68645c !important; }
+.choices button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+.decision-history { margin-top: 16px; text-align: left; }
+.decision-list { display: grid; gap: 0; margin-top: 10px; }
+.decision-item { display: flex; align-items: center; gap: 11px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.decision-item:last-child { border-bottom: 0; }
+.decision-number { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; border-radius: 8px; background: var(--lime); color: var(--ink); font-weight: 900; font-size: 12px; }
+.decision-detail { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 3px; }
+.decision-detail b { font-size: 13px; }
+.decision-detail small { font-size: 11px; line-height: 1.35; color: #777; }
+.decision-item > strong { white-space: nowrap; font-size: 13px; }
+.decision-footnote { margin: 10px 0 0; font-size: 11px; color: #777; line-height: 1.45; }
