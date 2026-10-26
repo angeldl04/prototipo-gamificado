@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react"
 import type { CSSProperties } from "react"
 import { Icon } from "./components/Icon"
-import { initialGame, products } from "./game-model"
+import { initialGame, products, INITIAL_BUDGET, MISSION_MINIMUM } from "./game-model"
 import type { Screen, Choice, Category, Product, GameState } from "./game-model"
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home")
   const [game, setGame] = useState<GameState>(() => {
     try {
-      const saved = localStorage.getItem("ctrlcompra-game-v3")
+      const saved = localStorage.getItem("ctrlcompra-game-v4")
       if (saved) {
         const parsed = JSON.parse(saved) as GameState
         if (typeof parsed.budget === "number" && typeof parsed.rounds === "number" && parsed.rounds >= 0 && parsed.rounds <= 4) {
@@ -25,9 +25,10 @@ export default function App() {
   const [pulse, setPulse] = useState(false)
   const [selectedInfluence, setSelectedInfluence] = useState("")
   const [secondsLeft, setSecondsLeft] = useState(522)
+  const formatCOP = (amount: number) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(amount)
 
   useEffect(() => {
-    try { localStorage.setItem("ctrlcompra-game-v3", JSON.stringify(game)) } catch { /* Persistencia opcional */ }
+    try { localStorage.setItem("ctrlcompra-game-v4", JSON.stringify(game)) } catch { /* Persistencia opcional */ }
   }, [game])
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function App() {
 
   const reset = () => {
     setGame(initialGame)
-    try { localStorage.removeItem("ctrlcompra-game-v3") } catch { /* Sin almacenamiento, se reinicia en memoria. */ }
+    try { localStorage.removeItem("ctrlcompra-game-v4") } catch { /* Sin almacenamiento, se reinicia en memoria. */ }
     setSelectedInfluence("")
     setSelected(null)
     setFeedback(null)
@@ -85,7 +86,7 @@ export default function App() {
       next.purchases += 1
       response = {
         title: "Subidón desbloqueado",
-        body: `La compra puede dar satisfacción inmediata (+8). Tu saldo baja ${selected.price} €. Después podrás valorar si la compra respondía a una necesidad.`,
+        body: `La compra puede dar satisfacción inmediata (+8). Tu saldo baja ${formatCOP(selected.price)}. Después podrás valorar si la compra respondía a una necesidad.`,
         tone: "orange",
         points: 100,
       }
@@ -107,7 +108,7 @@ export default function App() {
       next.compared += 1
       response = {
         title: "Radar de alternativas",
-        body: `Alternativa simulada: ${selected.alternativeName}, por ${selected.alternativePrice} €. Ahorrarías ${selected.price - selected.alternativePrice} € frente al producto original. No compras todavía.`,
+        body: `Alternativa simulada: ${selected.alternativeName}, por ${formatCOP(selected.alternativePrice)}. Ahorrarías ${formatCOP(selected.price - selected.alternativePrice)} frente al producto original. No compras todavía.`,
         tone: "lime",
         points: 100,
       }
@@ -137,7 +138,7 @@ export default function App() {
   }
 
   const level = Math.min(5, 1 + Math.floor(game.points / 180))
-  const spent = 120 - game.budget
+  const spent = INITIAL_BUDGET - game.budget
   const profile =
     game.purchases >= 3
       ? { name: "Comprador frecuente", text: "Realizaste varias compras en esta partida. Antes de la próxima, puede ayudarte separar lo que necesitas de lo que te apetece.", color: "orange" }
@@ -168,7 +169,7 @@ export default function App() {
             {game.rounds > 0 && <button className="restart-link" onClick={reset}>Empezar una partida nueva</button>}
             <div className="game-meta">
               <div><Icon name="clock" /><span><b>4</b> decisiones por partida</span></div>
-              <div><Icon name="wallet" /><span><b>120 €</b> de presupuesto</span></div>
+              <div><Icon name="wallet" /><span><b>{formatCOP(INITIAL_BUDGET)}</b> de presupuesto</span></div>
               <div><Icon name="trophy" /><span><b>5</b> insignias</span></div>
             </div>
           </div>
@@ -202,7 +203,7 @@ export default function App() {
     const badges = [
       { name: "Pausa consciente", description: "Esperaste antes de decidir", unlocked: game.waited >= 1 },
       { name: "Radar de opciones", description: "Comparaste una alternativa", unlocked: game.compared >= 1 },
-      { name: "Presupuesto protegido", description: "Terminaste con al menos 40 €", unlocked: game.budget >= 40 },
+      { name: "Presupuesto protegido", description: `Terminaste con al menos ${formatCOP(MISSION_MINIMUM)}`, unlocked: game.budget >= MISSION_MINIMUM },
       { name: "Decisión reflexiva", description: "Tomaste 2 o más decisiones reflexivas: esperar, comparar o no comprar", unlocked: game.waited + game.compared + game.skipped >= 2 },
       { name: "Carrito consciente", description: "Terminaste sin comprar productos", unlocked: game.purchases === 0 },
     ]
@@ -220,16 +221,16 @@ export default function App() {
           <div className="score-strip">
             <div><span>PUNTOS</span><b>{game.points}</b></div>
             <div><span>NIVEL</span><b>{level}</b></div>
-            <div><span>SALDO FINAL</span><b>{game.budget} €</b></div>
+            <div><span>SALDO FINAL</span><b>{formatCOP(game.budget)}</b></div>
           </div>
 
           <div className="results-grid">
             <section className="result-card spending">
               <div className="card-heading"><span>Tu presupuesto</span><Icon name="wallet" /></div>
-              <div className="donut" style={{ "--value": `${Math.min(100, (spent / 120) * 100)}%` } as CSSProperties}>
-                <div><b>{spent} €</b><span>gastados</span></div>
+              <div className="donut" style={{ "--value": `${Math.min(100, (spent / INITIAL_BUDGET) * 100)}%` } as CSSProperties}>
+                <div><b>{formatCOP(spent)}</b><span>gastados</span></div>
               </div>
-              <div className="legend"><span><i className="dot orange" /> Gastado {spent} €</span><span><i className="dot lime" /> Conservado {game.budget} €</span></div>
+              <div className="legend"><span><i className="dot orange" /> Gastado {formatCOP(spent)}</span><span><i className="dot lime" /> Conservado {formatCOP(game.budget)}</span></div>
             </section>
             <section className="result-card stats">
               <div className="card-heading"><span>Tu partida en datos</span><Icon name="bolt" /></div>
@@ -252,14 +253,14 @@ export default function App() {
           <section className="result-card decision-history" aria-labelledby="decision-history-title">
             <div className="card-heading"><span id="decision-history-title">Historial de decisiones</span><Icon name="check" /></div>
             <div className="decision-list">
-              {game.decisions.map((decision, index) => <div className="decision-item" key={`${decision.productId}-${index}`}><span className="decision-number">{index + 1}</span><div className="decision-detail"><b>{decision.productName}</b><small>{choiceLabels[decision.choice]} · Motivo señalado: {decision.influence}</small></div><strong title="Precio del producto consultado">{decision.price} €</strong></div>)}
+              {game.decisions.map((decision, index) => <div className="decision-item" key={`${decision.productId}-${index}`}><span className="decision-number">{index + 1}</span><div className="decision-detail"><b>{decision.productName}</b><small>{choiceLabels[decision.choice]} · Motivo señalado: {decision.influence}</small></div><strong title="Precio del producto consultado">{formatCOP(decision.price)}</strong></div>)}
             </div>
             <p className="decision-footnote">Los motivos son autorreportados por el jugador. El historial muestra elecciones de esta partida y no pretende diagnosticar conductas.</p>
           </section>
           <section className="result-card mission-result" aria-labelledby="mission-result-title">
             <div className="card-heading"><span id="mission-result-title">Resultado de la misión</span><Icon name="trophy" /></div>
-            <strong className="mission-status">{game.rounds === 4 && game.budget >= 40 ? "MISIÓN CUMPLIDA" : game.rounds === 4 ? "MISIÓN NO CUMPLIDA" : "PARTIDA INCOMPLETA"}</strong>
-            <p>{game.rounds < 4 ? `Has completado ${game.rounds} de 4 decisiones. Termina la partida para evaluar la misión.` : game.budget >= 40 ? `¡Bien! Conservaste ${game.budget} €, por encima del mínimo de 40 €.` : `Terminaste con ${game.budget} €. Te faltaron ${40 - game.budget} € para alcanzar la meta.`}</p>
+            <strong className="mission-status">{game.rounds === 4 && game.budget >= MISSION_MINIMUM ? "MISIÓN CUMPLIDA" : game.rounds === 4 ? "MISIÓN NO CUMPLIDA" : "PARTIDA INCOMPLETA"}</strong>
+            <p>{game.rounds < 4 ? `Has completado ${game.rounds} de 4 decisiones. Termina la partida para evaluar la misión.` : game.budget >= MISSION_MINIMUM ? `¡Bien! Conservaste ${formatCOP(game.budget)}, por encima del mínimo de ${formatCOP(MISSION_MINIMUM)}.` : `Terminaste con ${formatCOP(game.budget)}. Te faltaron ${formatCOP(MISSION_MINIMUM - game.budget)} para alcanzar la meta.`}</p>
           </section>
           <section className="result-card badges-card" aria-labelledby="badges-title">
             <div className="card-heading"><span id="badges-title">Insignias de esta partida</span><Icon name="star" /></div>
@@ -298,16 +299,16 @@ export default function App() {
           <p>Tienes 4 decisiones. No hay respuestas correctas, solo consecuencias.</p><p className="simulation-note">Los precios, descuentos, tendencias y mensajes de urgencia son simulados. No se realizan compras reales.</p>
         </div>
         <div className="budget-card">
-          <div className="budget-top"><span><Icon name="wallet" /> PRESUPUESTO</span><strong>{game.budget} €</strong></div>
-          <div className="budget-track"><i style={{ width: `${(game.budget / 120) * 100}%` }} /></div>
-          <small>{spent === 0 ? "Aún no has gastado nada" : `Has gastado ${spent} € de 120 €`}</small>
+          <div className="budget-top"><span><Icon name="wallet" /> PRESUPUESTO</span><strong>{formatCOP(game.budget)}</strong></div>
+          <div className="budget-track"><i style={{ width: `${(game.budget / INITIAL_BUDGET) * 100}%` }} /></div>
+          <small>{spent === 0 ? "Aún no has gastado nada" : `Has gastado ${formatCOP(spent)} de ${formatCOP(INITIAL_BUDGET)}`}</small>
         </div>
       </section>
 
       <div className="mission-banner">
         <div className="mission-icon"><Icon name="trophy" /></div>
-        <div><span>MISIÓN DE HOY</span><b>Termina la partida conservando al menos 40 €</b></div>
-        <strong>{game.rounds >= 4 ? (game.budget >= 40 ? "CUMPLIDA" : "NO CUMPLIDA") : (game.budget >= 40 ? "EN CURSO" : "EN RIESGO")}</strong>
+        <div><span>MISIÓN DE HOY</span><b>Termina la partida conservando al menos {formatCOP(MISSION_MINIMUM)}</b></div>
+        <strong>{game.rounds >= 4 ? (game.budget >= MISSION_MINIMUM ? "CUMPLIDA" : "NO CUMPLIDA") : (game.budget >= MISSION_MINIMUM ? "EN CURSO" : "EN RIESGO")}</strong>
       </div>
 
       <section className="catalog">
@@ -332,7 +333,7 @@ export default function App() {
                 <div className="product-info">
                   <small>{product.category}</small>
                   <h2>{product.name}</h2>
-                  <div className="price"><b>{product.price} €</b><s>{product.oldPrice} €</s></div>
+                  <div className="price"><b>{formatCOP(product.price)}</b><s>{formatCOP(product.oldPrice)}</s></div>
                   <button disabled={owned || game.rounds >= 4} onClick={() => { setSelectedInfluence(""); setSelected(product) }}>
                     {owned ? "YA ES TUYO" : game.rounds >= 4 ? "PARTIDA COMPLETA" : "QUIERO ESTO"} <Icon name="arrow" size={17} />
                   </button>
@@ -360,7 +361,7 @@ export default function App() {
               <fieldset className="influence-picker"><legend>¿Qué influye más en tu decisión? (elige una opción)</legend>{["Oferta", "Tendencia", "Presión social", "Necesidad", "Curiosidad"].map((item) => <label key={item}><input type="radio" name="influence" value={item} checked={selectedInfluence === item} onChange={() => setSelectedInfluence(item)} /> {item}</label>)}</fieldset>
               <div className="choices">
                 <button className="choice buy" disabled={!selectedInfluence || game.budget < selected.price} onClick={() => choose("buy")}>
-                  <span><Icon name="bag" /></span><div><b>COMPRAR AHORA</b><small>{game.budget < selected.price ? "No tienes saldo suficiente" : `−${selected.price} € · satisfacción instantánea`}</small></div><Icon name="arrow" />
+                  <span><Icon name="bag" /></span><div><b>COMPRAR AHORA</b><small>{game.budget < selected.price ? "No tienes saldo suficiente" : `−${formatCOP(selected.price)} · satisfacción instantánea`}</small></div><Icon name="arrow" />
                 </button>
                 <button className="choice" disabled={!selectedInfluence} onClick={() => choose("wait")}><span><Icon name="clock" /></span><div><b>SIMULAR PAUSA DE 24 H</b><small>Imagina que vuelves mañana con la cabeza fría</small></div><Icon name="arrow" /></button>
                 <button className="choice" disabled={!selectedInfluence} onClick={() => choose("compare")}><span><Icon name="search" /></span><div><b>COMPARAR OPCIONES</b><small>Busca segunda mano o una alternativa</small></div><Icon name="arrow" /></button>
@@ -379,7 +380,7 @@ export default function App() {
             <h2 id="feedback-title">{feedback.title}</h2>
             <p>{feedback.body}</p>
             <div className="feedback-stats">
-              <div><small>SALDO</small><b>{game.budget} €</b></div>
+              <div><small>SALDO</small><b>{formatCOP(game.budget)}</b></div>
               <div><small>PUNTOS</small><b>+{feedback.points}</b></div>
               <div><small>ÁNIMO</small><b>{game.satisfaction}%</b></div>
             </div>
@@ -397,10 +398,10 @@ export default function App() {
             <p>{game.inventory.length ? "Esto es lo que tus decisiones han sumado hasta ahora." : "Todavía está vacío. ¿Paz mental o solo calentando?"}</p>
             <div className="inventory-list">
               {game.inventory.map((product) => (
-                <div key={product.id}><img src={product.image} alt="" onError={(event) => { event.currentTarget.style.display = "none" }} /><span><b>{product.name}</b><small>{product.category}</small></span><strong>{product.price} €</strong></div>
+                <div key={product.id}><img src={product.image} alt="" onError={(event) => { event.currentTarget.style.display = "none" }} /><span><b>{product.name}</b><small>{product.category}</small></span><strong>{formatCOP(product.price)}</strong></div>
               ))}
             </div>
-            <div className="drawer-total"><span>TOTAL GASTADO</span><b>{spent} €</b></div>
+            <div className="drawer-total"><span>TOTAL GASTADO</span><b>{formatCOP(spent)}</b></div>
           </aside>
         </div>
       )}

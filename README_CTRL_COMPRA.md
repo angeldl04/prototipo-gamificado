@@ -4,7 +4,7 @@ Prototipo educativo de tienda simulada para explorar decisiones de consumo respo
 
 ## Cambios incluidos
 
-- La misión de conservar al menos 40 € se evalúa al terminar las cuatro decisiones y muestra un resultado claro.
+- La misión de conservar al menos $ 200.000 COP se evalúa al terminar las cuatro decisiones y muestra un resultado claro.
 - El jugador debe identificar qué factor influyó en cada decisión. Los resultados se basan en ese autorreporte y ya no se infieren únicamente por haber comprado un producto.
 - Se añadió un historial de las cuatro decisiones con producto, elección y motivo señalado.
 - La cuenta atrás de la pantalla de decisión funciona de verdad y, al llegar a cero, no penaliza al jugador. Se identifica como simulación, sin escasez ni ofertas reales.
@@ -34,9 +34,23 @@ npm run build
 
 ## Validación realizada en este entorno
 
-- Se comprobó la transpilación sintáctica TypeScript/JSX de todos los archivos de `src`.
+- Se comprobó la transpilación sintáctica TypeScript/JSX de los archivos principales de `src`.
 - No fue posible completar `npm install` ni ejecutar la compilación de producción en este entorno porque el registro de paquetes npm no era accesible por un error de red DNS (`EAI_AGAIN`). Por ello, la compilación final debe verificarse en un equipo con acceso al registro de paquetes.
 
 ## Alcance y límites
 
 Este es un prototipo de aprendizaje: no procesa pagos, no consulta precios reales y no mide psicológicamente al usuario. Las influencias son autorreportadas; el perfil es orientativo. La partida se conserva en el navegador del mismo dispositivo mediante `localStorage`.
+
+
+## Moneda
+
+El presupuesto inicial es de $ 600.000 COP y la misión consiste en conservar al menos $ 200.000 COP. Los precios y alternativas son simulados para la experiencia educativa. La interfaz usa `Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" })` para mostrar el símbolo `$` y el separador de miles colombiano.
+
+Precios simulados de referencia:
+
+- Sneakers Cloud: $ 269.900 (antes $ 449.900); alternativa $ 129.900.
+- Buds Pop: $ 189.900 (antes $ 249.900); alternativa $ 99.900.
+- Gafas Solar ’00: $ 89.900 (antes $ 129.900); alternativa $ 59.900.
+- Hoodie Afterclass: $ 219.900 (antes $ 299.900); alternativa $ 119.900.
+- Mini Speaker Go: $ 149.900 (antes $ 189.900); alternativa $ 79.900.
+- Everyday Kit: $ 79.900 (antes $ 109.900); alternativa $ 39.900.
